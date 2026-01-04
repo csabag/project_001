@@ -12,7 +12,8 @@ const INTEREST_KEYWORDS = [
     'ai', 'machine learning', 'gpt', 'llm', 'claude',
     'javascript', 'python', 'rust', 'go', 'typescript',
     'startup', 'open source', 'github', 'security',
-    'web', 'react', 'vue', 'node', 'developer'
+    'web', 'react', 'vue', 'node', 'developer',
+    'ask hn', 'show hn'  // Prioritize Ask/Show HN as they have descriptions
 ];
 
 // Fetch top story IDs
@@ -145,6 +146,11 @@ async function loadStories() {
             if (isInteresting(story) || stories.length < 10) {
                 // Always show at least 10 stories even if they don't match perfectly
                 stories.push(story);
+
+                // Debug: Log if story has description
+                if (story.text) {
+                    console.log('Story with description:', story.title, '(length:', story.text.length, ')');
+                }
             }
         }
 
@@ -152,7 +158,14 @@ async function loadStories() {
         if (stories.length === 0) {
             showError('No stories found. Try adjusting your interest keywords in app.js');
         } else {
-            stories.forEach(story => {
+            // Sort to show stories with descriptions first
+            const sortedStories = stories.sort((a, b) => {
+                if (a.text && !b.text) return -1;
+                if (!a.text && b.text) return 1;
+                return 0;
+            });
+
+            sortedStories.forEach(story => {
                 const card = createStoryCard(story);
                 storiesContainer.appendChild(card);
             });
