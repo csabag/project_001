@@ -54,6 +54,26 @@ function formatTime(timestamp) {
     return `${diffDays}d ago`;
 }
 
+// Strip HTML tags and truncate text
+function formatDescription(htmlText, maxLength = 200) {
+    if (!htmlText) return '';
+
+    // Strip HTML tags
+    const text = htmlText.replace(/<[^>]*>/g, '');
+
+    // Decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    const decoded = textarea.value;
+
+    // Truncate if needed
+    if (decoded.length > maxLength) {
+        return decoded.substring(0, maxLength).trim() + '...';
+    }
+
+    return decoded;
+}
+
 // Create story card HTML
 function createStoryCard(story) {
     const card = document.createElement('div');
@@ -61,6 +81,7 @@ function createStoryCard(story) {
 
     const url = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
     const domain = story.url ? new URL(story.url).hostname.replace('www.', '') : 'news.ycombinator.com';
+    const description = formatDescription(story.text);
 
     card.innerHTML = `
         <div class="story-title">
@@ -68,6 +89,7 @@ function createStoryCard(story) {
                 ${story.title}
             </a>
         </div>
+        ${description ? `<div class="story-description">${description}</div>` : ''}
         <div class="story-meta">
             <span>⬆️ ${story.score || 0} points</span>
             <span>💬 ${story.descendants || 0} comments</span>
